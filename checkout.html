@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout - Sneaker Bot</title>
+    <script src="https://js.stripe.com/v3/"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: #f7f7f7;
+        }
+        .container {
+            max-width: 500px;
+            width: 100%;
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        #payment-form {
+            width: 100%;
+        }
+        .form-row {
+            margin: 1rem 0;
+        }
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #333;
+        }
+        .input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+        }
+        #card-element {
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: white;
+        }
+        #submit-button {
+            background: #ff4b4b;
+            color: white;
+            padding: 1rem;
+            border: none;
+            border-radius: 4px;
+            width: 100%;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        #submit-button:hover {
+            background: #ff3333;
+        }
+        .error {
+            color: #dc3545;
+            margin-top: 0.5rem;
+        }
+        .success {
+            color: #28a745;
+            text-align: center;
+            margin: 2rem 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Checkout</h1>
+        <div id="product-details"></div>
+        <form id="payment-form">
+            <div class="form-row">
+                <label for="name">Name</label>
+                <input type="text" id="name" class="input" required>
+            </div>
+            <div class="form-row">
+                <label for="email">Email</label>
+                <input type="email" id="email" class="input" required>
+            </div>
+            <div class="form-row">
+                <label for="card-element">Credit or debit card</label>
+                <div id="card-element"></div>
+                <div id="card-errors" class="error" role="alert"></div>
+            </div>
+            <button id="submit-button">Pay Now</button>
+        </form>
+    </div>
+
+    <script>
+        // Get product details and client secret from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const productName = urlParams.get('product');
+        const clientSecret = urlParams.get('secret');
+
+        // Display product details
+        const productDetails = document.getElementById('product-details');
+        productDetails.innerHTML = `<h2>${productName}</h2>`;
+
+        // Initialize Stripe
+        const stripe = Stripe('YOUR_STRIPE_PUBLISHABLE_KEY');
+        const elements = stripe.elements();
+
+        // Create card element
+        const card = elements.create('card');
+        card.mount('#card-element');
+
+        // Handle form submission
+        const form = document.getElementById('payment-form');
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            const { error, paymentMethod } = await stripe.createPaymentMethod({
+                type: 'card',
+                card: card,
+                billing_details: {
+                    name: document.getElementById('name').value,
+                    email: document.getElementById('email').value,
+                },
+            });
+
+            if (error) {
+                const errorElement = document.getElementById('card-errors');
+                errorElement.textContent = error.message;
+            } else {
+                // Confirm payment with server
+                const result = await stripe.confirmCardPayment(clientSecret, {
+                    payment_method: paymentMethod.id
+                });
+
+                if (result.error) {
+                    const errorElement = document.getElementById('card-errors');
+                    errorElement.textContent = result.error.message;
+                } else {
+                    // Payment successful
+                    form.innerHTML = `
+                        <div class="success">
+                            <h2>Payment Successful! 🎉</h2>
+                            <p>Thank you for your purchase.</p>
+                            <p>Order confirmation has been sent to your email.</p>
+                        </div>
+                    `;
+                }
+            }
+        });
+    </script>
+</body>
+</html> 

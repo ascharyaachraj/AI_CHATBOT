@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sneaker Chatbot</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Refined styles for the chat log */
+        #chat-log {
+            height: 500px;
+            overflow-y: auto;
+            padding: 2rem;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            background-color: rgba(248, 250, 252, 0.9);
+            border-radius: 1rem;
+            font-size: 1rem;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(226, 232, 240, 0.5);
+        }
+        .message {
+            margin-bottom: 1.25rem;
+            padding: 1.25rem;
+            border-radius: 1.5rem;
+            max-width: 90%;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+            font-size: 1rem;
+            line-height: 1.5rem;
+        }
+        .user-message {
+            background-color: #e0f2fe;
+            color: #065e84;
+            align-self: flex-end;
+            border-top-right-radius: 1.5rem;
+            border-bottom-right-radius: 1.5rem;
+            border-top-left-radius: 0.8rem;
+        }
+        .bot-message {
+            background-color: #f0f4f8;
+            color: #1e293b;
+            align-self: flex-start;
+            border-top-left-radius: 1.5rem;
+            border-bottom-left-radius: 1.5rem;
+            border-top-right-radius: 0.8rem;
+        }
+        .input-area {
+            display: flex;
+            align-items: center;
+            padding: 1.25rem;
+            border-top: 1px solid rgba(226, 232, 240, 0.5);
+            background-color: rgba(255, 255, 255, 0.8);
+            border-bottom-left-radius: 1rem;
+            border-bottom-right-radius: 1rem;
+            backdrop-filter: blur(10px);
+        }
+        #user-input {
+            flex-grow: 1;
+            border-radius: 0.8rem;
+            border: 1px solid #e2e8f0;
+            padding: 0.9rem;
+            margin-right: 1.25rem;
+            font-size: 1rem;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        #user-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        #send-button {
+            background-color: #06b6d4;
+            color: white;
+            padding: 0.9rem 2rem;
+            border-radius: 0.8rem;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease;
+        }
+        #send-button:hover {
+            background-color: #089192;
+            box-shadow: 0 3px 7px rgba(0, 0, 0, 0.15);
+            transform: translateY(-3px);
+        }
+        #send-button:active {
+            background-color: #047857;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+            transform: translateY(0);
+        }
+        .sneaker-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 2.5rem;
+            padding: 2.5rem;
+            border-radius: 1.25rem;
+            background-color: rgba(255, 255, 255, 0.8);
+            box-shadow: 0 8px 14px rgba(0, 0, 0, 0.08);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(226, 232, 240, 0.5);
+        }
+        .sneaker-item:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 10px 16px rgba(0, 0, 0, 0.1);
+        }
+        .sneaker-image {
+            max-width: 100%;
+            height: auto;
+            border-radius: 0.8rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s ease;
+        }
+        .sneaker-image:hover {
+            transform: scale(1.04);
+        }
+        .text-lg {
+            font-size: 1.15rem;
+            line-height: 1.75rem;
+            font-weight: 700;
+            color: #2d3748;
+        }
+        .text-gray-600 {
+            color: #4a5568;
+            line-height: 1.6rem;
+            font-size: 1rem;
+        }
+        .intro-message {
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            border-radius: 1.5rem;
+            background-color: rgba(240, 244, 248, 0.9);
+            color: #1e293b;
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: 600;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(226, 232, 240, 0.5);
+            display: flex;
+            align-items: center;
+            gap: 1.25rem;
+            backdrop-filter: blur(10px);
+        }
+        .intro-image {
+            width: 80px;
+            height: auto;
+            border-radius: 50%;
+        }
+        body {
+            background-image: url('https://c0.wallpaperflare.com/preview/186/124/897/red-and-white-air-jordan-1-shoe-on-concrete-floor.jpg');
+            background-size: cover;
+            background-position: center;
+            margin: 0;
+            padding: 0;
+        }
+        .chat-container {
+            background-color: transparent;
+        }
+        .speciality-box {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            background-color: rgba(226, 232, 240, 0.5);
+            font-size: 0.9rem;
+            color: #4a5568;
+            line-height: 1.4rem;
+            border: 1px solid rgba(226, 232, 240, 0.5);
+        }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans" style="zoom: 110%;">
+    <div id="chat-container" class="bg-white shadow-xl rounded-2xl flex flex-col max-w-md mx-auto mt-8" style="zoom: 120%;">
+        <div id="chat-log" class="flex-1 overflow-y-auto">
+            <div class="intro-message">
+                <img src="https://www.clipartmax.com/png/middle/140-1400847_image-chat-bot-vector.png" alt="Robot Avatar" class="intro-image" style="width: 80px; height: auto;">
+                I'm Rio, your sneaker chatbot!
+            </div>
+        </div>
+        <div class="input-area">
+            <input type="text" id="user-input" placeholder="Type your message..." class="flex-1">
+            <button id="send-button" class="bg-teal-500 hover:bg-teal-600 text-white font-semibold py-2 px-5 rounded-full">Send</button>
+        </div>
+    </div>
+
+    <script src="/static/script.js" type="module"></script>
+</body>
+</html> 
